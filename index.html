@@ -42,10 +42,10 @@
                 let direction = directions.RIGHT;
 
                 document.addEventListener("keyup", e => {
-                    if(e.key == "Right" || e.key == "ArrowRight") {
+                    if(e.key == "Right" || e.key == "ArrowRight" || e.key == "l") {
                         direction = turnRight();
                     }
-                    else if (e.key == "Left" || e.key == "ArrowLeft") {
+                    else if (e.key == "Left" || e.key == "ArrowLeft" || e.key == "h") {
                         direction = turnLeft();
                     }
                 }, false);
@@ -97,9 +97,7 @@
                     }
                 }
 
-                var run = () => {
-                    draw();
-                };
+                var run = () => draw();
 
                 return {
                     run: run
