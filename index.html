@@ -20,14 +20,53 @@
         <canvas id="gameCanvas"></canvas>
 
         <script>
-            var WORM = (() => {
-                var gameCanvas = document.getElementById("gameCanvas");
-                var ctx = gameCanvas.getContext("2d");
-                var maxWidth = window.innerWidth;
-                var maxHeight = window.maxHeight;
+            /*
+            key left, key right
+            start with body length 2
+            keep track of whole body
+            place random goody
+            if eat goody, make body longer
+            wrap over screen edge
+            collision with body means game over
 
-                var gameOver = false;
-                var r = { x: 10, y: 10, w: 10, h: 10};
+            
+            */
+            var WORM = (() => {
+                const directions = { UP: 'UP', DOWN: 'DOWN', RIGHT: 'RIGHT', LEFT: 'LEFT' };
+                const gameCanvas = document.getElementById("gameCanvas");
+                const ctx = gameCanvas.getContext("2d");
+                let maxWidth = window.innerWidth;
+                let maxHeight = window.maxHeight;
+                let gameOver = false;
+                let r = { x: 10, y: 10, w: 10, h: 10};
+                let direction = directions.RIGHT;
+
+                document.addEventListener("keyup", e => {
+                    if(e.key == "Right" || e.key == "ArrowRight") {
+                        direction = turnRight();
+                    }
+                    else if (e.key == "Left" || e.key == "ArrowLeft") {
+                        direction = turnLeft();
+                    }
+                }, false);
+
+                turnRight = () => {
+                    switch (direction) {
+                        case directions.UP: return directions.RIGHT;
+                        case directions.RIGHT: return directions.DOWN;
+                        case directions.DOWN: return directions.LEFT;
+                        case directions.LEFT: return directions.UP;
+                    }
+                };
+
+                turnLeft = () => {
+                    switch (direction) {
+                        case directions.UP: return directions.LEFT;
+                        case directions.RIGHT: return directions.UP;
+                        case directions.DOWN: return directions.RIGHT;
+                        case directions.LEFT: return directions.DOWN;
+                    }
+                };
 
                 var detectCollision = () => {
                     if (r.x >= maxWidth-r.w || r.x <=0 || r.y >= maxHeight-r.h || r.y <= 0) {
@@ -42,8 +81,13 @@
 
                     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-                    r.x += 1;
-                    r.y += 1;
+                    switch (direction) {
+                        case directions.UP: r.y -= 10; break;
+                        case directions.RIGHT: r.x += 10; break;
+                        case directions.DOWN: r.y += 10; break;
+                        case directions.LEFT: r.x -= 10; break;
+                    }
+
                     ctx.fillRect(r.x, r.y, r.w, r.h);
 
                     detectCollision();
