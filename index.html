@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+        <style>
+            html,body {
+                height: 100%;
+                width: 100%;
+                margin: 0;
+            }
+            #gameCanvas {
+                display: block;
+                height: 100%;
+                width: 100%;
+                margin: 0;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="gameCanvas"></canvas>
+
+        <script>
+            var WORM = (() => {
+                var gameCanvas = document.getElementById("gameCanvas");
+                var ctx = gameCanvas.getContext("2d");
+                var maxWidth = window.innerWidth;
+                var maxHeight = window.maxHeight;
+
+                var gameOver = false;
+                var r = { x: 10, y: 10, w: 10, h: 10};
+
+                var detectCollision = () => {
+                    if (r.x >= maxWidth-r.w || r.x <=0 || r.y >= maxHeight-r.h || r.y <= 0) {
+                        console.log("game over");
+                        gameOver = true;
+                    }
+                };
+
+                var draw = () => {
+                    ctx.canvas.width = maxWidth = window.innerWidth;
+                    ctx.canvas.height = maxHeight =window.innerHeight;
+
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+                    r.x += 1;
+                    r.y += 1;
+                    ctx.fillRect(r.x, r.y, r.w, r.h);
+
+                    detectCollision();
+
+                    if (gameOver == false) {
+                        requestAnimationFrame(draw);
+                    }
+                }
+
+                var run = () => {
+                    draw();
+                };
+
+                return {
+                    run: run
+                }
+            })();
+
+            WORM.run();
+        </script>
+    </body>
+</html>
