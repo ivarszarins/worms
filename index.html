@@ -111,7 +111,7 @@
 			const directions = { UP: 'UP', DOWN: 'DOWN', RIGHT: 'RIGHT', LEFT: 'LEFT' };
 			const gameCanvas = document.getElementById("gameCanvas");
 			const ctx = gameCanvas.getContext("2d");
-			const segmentSize = 10;
+			const segmentSize = 20;
 			let maxWidth = window.innerWidth;
 			let maxHeight = window.maxHeight;
 			let	rows = maxHeight / segmentSize;
@@ -124,9 +124,11 @@
 			document.addEventListener("keyup", e => {
 				if (e.key == "Right" || e.key == "ArrowRight" || e.key == "l") {
 					direction = turnRight();
+					worm.move(direction);
 				}
 				else if (e.key == "Left" || e.key == "ArrowLeft" || e.key == "h") {
 					direction = turnLeft();
+					worm.move(direction);
 				}
 			}, false);
 
