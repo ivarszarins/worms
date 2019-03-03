@@ -32,19 +32,94 @@
 		 */
 
 		const WORM_GAME = (() => {
+			function Worm(startPoint, startDirection, startSize) {
+				this.arr = new Array(100);
+				this.head = startSize-1;
+				this.tail = 0;
+
+				// initialize worm
+				const dx = startDirection == directions.RIGHT ? -1 : startDirection == directions.LEFT ? 1 : 0;
+				const dy = startDirection == directions.DOWN ? -1 : startDirection == directions.UP ? 1 : 0;
+				[...Array(startSize).keys()].map(i => this.arr[this.head-i] = { x: startPoint.x + dx * i, y: startPoint.y + dy * i });
+
+				this.move = (direction) => {
+					const dx = direction == directions.RIGHT ? 1 : direction == directions.LEFT ? -1 : 0;
+					const dy = direction == directions.DOWN ? 1 : direction == directions.UP ? -1 : 0;
+					oldHead = this.arr[this.head];
+
+					this.advanceHead();
+					this.advanceTail();
+
+					newHead = this.arr[this.head] = { x: oldHead.x + dx, y: oldHead.y + dy };
+
+					// detect edges
+					if (newHead.x >= columns) {
+						newHead.x = 0;
+						return;
+					}
+					if (newHead.x <= 0) {
+						newHead.x = columns - 1;
+						return;
+					}
+					if (newHead.y >= rows) {
+						newHead.y = 0;
+						return;
+					}
+					if (newHead.y <= 0) {
+						newHead.y = rows - 1;
+						return;
+					}
+
+				};
+
+				this.advanceHead = () => {
+					this.head = this.head == this.arr.length -1 ? 0 : this.head += 1;
+				};
+				this.advanceTail = () => {
+					this.tail = this.tail == this.arr.length -1 ? 0 : this.tail += 1;
+				};
+
+				this.getIterator = function*() {
+					if (this.head > this.tail) {
+						console.log("just going from head to tail");
+						for(let i = this.head; i >= this.tail; i--) {
+							yield this.arr[i];
+						}
+					} else {
+						console.log("going from head to 0 first");
+						for(let i = this.head; i >= 0; i--) {
+							yield this.arr[i];
+						}
+						console.log("and then from arr.length -1 to tail");
+						for(let i = this.arr.length-1; i >= this.tail; i--) {
+							yield this.arr[i];
+						}
+					}
+				};
+
+				this.draw = () => {
+					let iter = this.getIterator();
+					let result = iter.next();
+					console.log("drawing head", result.value);
+					while(!result.done) {
+						ctx.fillRect(result.value.x * segmentSize, result.value.y * segmentSize, segmentSize, segmentSize);
+						result = iter.next();
+					}
+				};
+			}
+
 			const directions = { UP: 'UP', DOWN: 'DOWN', RIGHT: 'RIGHT', LEFT: 'LEFT' };
 			const gameCanvas = document.getElementById("gameCanvas");
 			const ctx = gameCanvas.getContext("2d");
 			const segmentSize = 10;
 			let maxWidth = window.innerWidth;
 			let maxHeight = window.maxHeight;
+			let	rows = maxHeight / segmentSize;
+			let	columns = maxWidth / segmentSize;
 			let gameOver = false;
 			let direction = directions.RIGHT;
-			let r = { x: 10, y: 10 };
 
-			let worm = [{ x: 10, y: 10 }, { x: 0, y: 10 }];
-			let headIndex = 0;
-			let length = 2;
+			let worm = new Worm({ x: 10, y:10}, directions.RIGHT, 80);
 
 			document.addEventListener("keyup", e => {
 				if (e.key == "Right" || e.key == "ArrowRight" || e.key == "l") {
@@ -73,46 +148,19 @@
 				}
 			};
 
-			var detectEdges = () => {
-				if (worm[0].x >= maxWidth) {
-					worm[0].x = 0;
-					return;
-				}
-				if (worm[0].x <= 0) {
-					worm[0].x = maxWidth - segmentSize;
-					return;
-				}
-				if (worm[0].y >= maxHeight) {
-					worm[0].y = 0;
-					return;
-				}
-				if (worm[0].y <= 0) {
-					worm[0].y = maxHeight - segmentSize;
-					return;
-				}
-			};
-
 			var draw = () => {
 				ctx.canvas.width = maxWidth = window.innerWidth;
 				ctx.canvas.height = maxHeight = window.innerHeight;
 
 				ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-				worm[1].x = worm[0].x;
-				worm[1].y = worm[0].y;
+				rows = maxHeight / segmentSize;
+				columns = maxWidth / segmentSize;
 
-				switch (direction) {
-					case directions.UP: worm[0].y -= segmentSize; break;
-					case directions.RIGHT: worm[0].x += segmentSize; break;
-					case directions.DOWN: worm[0].y += segmentSize; break;
-					case directions.LEFT: worm[0].x -= segmentSize; break;
-				}
+				worm.move(direction);
+				worm.draw(ctx);
 
-				for (i = 0; i < worm.length; i++) {
-					ctx.fillRect(worm[i].x, worm[i].y, segmentSize, segmentSize);
-				}
-
-				detectEdges();
+				// detectEdges();
 
 				if (gameOver == false) {
 					requestAnimationFrame(draw);
