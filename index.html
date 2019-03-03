@@ -73,10 +73,22 @@
                     }
                 };
 
-                var detectCollision = () => {
-                    if (worm[0].x >= maxWidth-segmentSize || worm[0].x <=0 || worm[0].y >= maxHeight-segmentSize || worm[0].y <= 0) {
-                        console.log("game over");
-                        gameOver = true;
+                var detectEdges = () => {
+                    if (worm[0].x >= maxWidth) {
+                        worm[0].x = 0;
+                        return;
+                    }
+                    if (worm[0].x <= 0) {
+                        worm[0].x = maxWidth-segmentSize;
+                        return;
+                    }
+                    if (worm[0].y >= maxHeight) {
+                        worm[0].y = 0;
+                        return;
+                    }
+                    if (worm[0].y <= 0) {
+                        worm[0].y = maxHeight-segmentSize;
+                        return;
                     }
                 };
 
@@ -100,7 +112,7 @@
                         ctx.fillRect(worm[i].x, worm[i].y, segmentSize, segmentSize);
                     }
 
-                    detectCollision();
+                    detectEdges();
 
                     if (gameOver == false) {
                         requestAnimationFrame(draw);
