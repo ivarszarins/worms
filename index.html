@@ -26,7 +26,7 @@
             if eat goody, make body longer
             collision with body means game over
             */
-            var WORM = (() => {
+            var WORM_GAME = (() => {
                 const directions = { UP: 'UP', DOWN: 'DOWN', RIGHT: 'RIGHT', LEFT: 'LEFT' };
                 const gameCanvas = document.getElementById("gameCanvas");
                 const ctx = gameCanvas.getContext("2d");
@@ -121,7 +121,7 @@
                 }
             })();
 
-            WORM.run();
+            WORM_GAME.run();
         </script>
     </body>
 </html>
