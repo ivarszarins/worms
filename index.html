@@ -1,127 +1,133 @@
 <!DOCTYPE HTML>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-        <style>
-            html,body {
-                height: 100%;
-                width: 100%;
-                margin: 0;
-            }
-            #gameCanvas {
-                display: block;
-                height: 100%;
-                width: 100%;
-                margin: 0;
-            }
-        </style>
-    </head>
-    <body>
-        <canvas id="gameCanvas"></canvas>
 
-        <script>
-            /*
-            keep track of whole body
-            place random goody
-            if eat goody, make body longer
-            collision with body means game over
-            */
-            var WORM_GAME = (() => {
-                const directions = { UP: 'UP', DOWN: 'DOWN', RIGHT: 'RIGHT', LEFT: 'LEFT' };
-                const gameCanvas = document.getElementById("gameCanvas");
-                const ctx = gameCanvas.getContext("2d");
-                const segmentSize = 10;
-                let maxWidth = window.innerWidth;
-                let maxHeight = window.maxHeight;
-                let gameOver = false;
-                let direction = directions.RIGHT;
-                let r = { x: 10, y: 10};
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<style>
+		html,
+		body {
+			height: 100%;
+			width: 100%;
+			margin: 0;
+		}
 
-                let worm = [{x: 10, y: 10}, {x: 0, y:10}];
-                let headIndex = 0;
-                let length = 2;
+		#gameCanvas {
+			display: block;
+			height: 100%;
+			width: 100%;
+			margin: 0;
+		}
+	</style>
+</head>
 
-                document.addEventListener("keyup", e => {
-                    if(e.key == "Right" || e.key == "ArrowRight" || e.key == "l") {
-                        direction = turnRight();
-                    }
-                    else if (e.key == "Left" || e.key == "ArrowLeft" || e.key == "h") {
-                        direction = turnLeft();
-                    }
-                }, false);
+<body>
+	<canvas id="gameCanvas"></canvas>
 
-                turnRight = () => {
-                    switch (direction) {
-                        case directions.UP: return directions.RIGHT;
-                        case directions.RIGHT: return directions.DOWN;
-                        case directions.DOWN: return directions.LEFT;
-                        case directions.LEFT: return directions.UP;
-                    }
-                };
+	<script>
+		/*
+		keep track of whole body
+		place random goody
+		if eat goody, make body longer
+		collision with body means game over
+		 */
 
-                turnLeft = () => {
-                    switch (direction) {
-                        case directions.UP: return directions.LEFT;
-                        case directions.RIGHT: return directions.UP;
-                        case directions.DOWN: return directions.RIGHT;
-                        case directions.LEFT: return directions.DOWN;
-                    }
-                };
+		const WORM_GAME = (() => {
+			const directions = { UP: 'UP', DOWN: 'DOWN', RIGHT: 'RIGHT', LEFT: 'LEFT' };
+			const gameCanvas = document.getElementById("gameCanvas");
+			const ctx = gameCanvas.getContext("2d");
+			const segmentSize = 10;
+			let maxWidth = window.innerWidth;
+			let maxHeight = window.maxHeight;
+			let gameOver = false;
+			let direction = directions.RIGHT;
+			let r = { x: 10, y: 10 };
 
-                var detectEdges = () => {
-                    if (worm[0].x >= maxWidth) {
-                        worm[0].x = 0;
-                        return;
-                    }
-                    if (worm[0].x <= 0) {
-                        worm[0].x = maxWidth-segmentSize;
-                        return;
-                    }
-                    if (worm[0].y >= maxHeight) {
-                        worm[0].y = 0;
-                        return;
-                    }
-                    if (worm[0].y <= 0) {
-                        worm[0].y = maxHeight-segmentSize;
-                        return;
-                    }
-                };
+			let worm = [{ x: 10, y: 10 }, { x: 0, y: 10 }];
+			let headIndex = 0;
+			let length = 2;
 
-                var draw = () => {
-                    ctx.canvas.width = maxWidth = window.innerWidth;
-                    ctx.canvas.height = maxHeight =window.innerHeight;
+			document.addEventListener("keyup", e => {
+				if (e.key == "Right" || e.key == "ArrowRight" || e.key == "l") {
+					direction = turnRight();
+				}
+				else if (e.key == "Left" || e.key == "ArrowLeft" || e.key == "h") {
+					direction = turnLeft();
+				}
+			}, false);
 
-                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+			turnRight = () => {
+				switch (direction) {
+					case directions.UP: return directions.RIGHT;
+					case directions.RIGHT: return directions.DOWN;
+					case directions.DOWN: return directions.LEFT;
+					case directions.LEFT: return directions.UP;
+				}
+			};
 
-                    worm[1].x = worm[0].x;
-                    worm[1].y = worm[0].y;
+			turnLeft = () => {
+				switch (direction) {
+					case directions.UP: return directions.LEFT;
+					case directions.RIGHT: return directions.UP;
+					case directions.DOWN: return directions.RIGHT;
+					case directions.LEFT: return directions.DOWN;
+				}
+			};
 
-                    switch (direction) {
-                        case directions.UP: worm[0].y -= segmentSize; break;
-                        case directions.RIGHT: worm[0].x += segmentSize; break;
-                        case directions.DOWN: worm[0].y += segmentSize; break;
-                        case directions.LEFT: worm[0].x -= segmentSize; break;
-                    }
+			var detectEdges = () => {
+				if (worm[0].x >= maxWidth) {
+					worm[0].x = 0;
+					return;
+				}
+				if (worm[0].x <= 0) {
+					worm[0].x = maxWidth - segmentSize;
+					return;
+				}
+				if (worm[0].y >= maxHeight) {
+					worm[0].y = 0;
+					return;
+				}
+				if (worm[0].y <= 0) {
+					worm[0].y = maxHeight - segmentSize;
+					return;
+				}
+			};
 
-                    for (i = 0; i< worm.length; i++) {
-                        ctx.fillRect(worm[i].x, worm[i].y, segmentSize, segmentSize);
-                    }
+			var draw = () => {
+				ctx.canvas.width = maxWidth = window.innerWidth;
+				ctx.canvas.height = maxHeight = window.innerHeight;
 
-                    detectEdges();
+				ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-                    if (gameOver == false) {
-                        requestAnimationFrame(draw);
-                    }
-                }
+				worm[1].x = worm[0].x;
+				worm[1].y = worm[0].y;
 
-                var run = () => draw();
+				switch (direction) {
+					case directions.UP: worm[0].y -= segmentSize; break;
+					case directions.RIGHT: worm[0].x += segmentSize; break;
+					case directions.DOWN: worm[0].y += segmentSize; break;
+					case directions.LEFT: worm[0].x -= segmentSize; break;
+				}
 
-                return {
-                    run: run
-                }
-            })();
+				for (i = 0; i < worm.length; i++) {
+					ctx.fillRect(worm[i].x, worm[i].y, segmentSize, segmentSize);
+				}
 
-            WORM_GAME.run();
-        </script>
-    </body>
+				detectEdges();
+
+				if (gameOver == false) {
+					requestAnimationFrame(draw);
+				}
+			}
+
+			var run = () => draw();
+
+			return {
+				run: run
+			}
+		})();
+
+		WORM_GAME.run();
+	</script>
+</body>
+
 </html>
