@@ -25,7 +25,6 @@
 
 	<script>
 		/*
-		keep track of whole body
 		place random goody
 		if eat goody, make body longer
 		collision with body means game over
@@ -55,42 +54,27 @@
 					// detect edges
 					if (newHead.x >= columns) {
 						newHead.x = 0;
-						return;
-					}
-					if (newHead.x <= 0) {
+					} else if (newHead.x <= 0) {
 						newHead.x = columns - 1;
-						return;
-					}
-					if (newHead.y >= rows) {
+					} else if (newHead.y >= rows) {
 						newHead.y = 0;
-						return;
-					}
-					if (newHead.y <= 0) {
+					} else if (newHead.y <= 0) {
 						newHead.y = rows - 1;
-						return;
 					}
-
 				};
 
-				this.advanceHead = () => {
-					this.head = this.head == this.arr.length -1 ? 0 : this.head += 1;
-				};
-				this.advanceTail = () => {
-					this.tail = this.tail == this.arr.length -1 ? 0 : this.tail += 1;
-				};
+				this.advanceHead = () => this.head = this.head == this.arr.length -1 ? 0 : this.head += 1;
+				this.advanceTail = () => this.tail = this.tail == this.arr.length -1 ? 0 : this.tail += 1;
 
 				this.getIterator = function*() {
 					if (this.head > this.tail) {
-						console.log("just going from head to tail");
 						for(let i = this.head; i >= this.tail; i--) {
 							yield this.arr[i];
 						}
 					} else {
-						console.log("going from head to 0 first");
 						for(let i = this.head; i >= 0; i--) {
 							yield this.arr[i];
 						}
-						console.log("and then from arr.length -1 to tail");
 						for(let i = this.arr.length-1; i >= this.tail; i--) {
 							yield this.arr[i];
 						}
