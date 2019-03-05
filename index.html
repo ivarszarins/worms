@@ -34,7 +34,8 @@
 			function Worm(startPoint, startDirection, startSize) {
 				this.arr = new Array(100);
 				this.head = startSize-1;
-				this.tail = 0;
+                this.tail = 0;
+                this.growSize = 0;
 
 				// initialize worm
 				const dx = startDirection == directions.RIGHT ? -1 : startDirection == directions.LEFT ? 1 : 0;
@@ -44,12 +45,11 @@
 				this.move = (direction) => {
 					const dx = direction == directions.RIGHT ? 1 : direction == directions.LEFT ? -1 : 0;
 					const dy = direction == directions.DOWN ? 1 : direction == directions.UP ? -1 : 0;
-					oldHead = this.arr[this.head];
+                    oldHead = this.arr[this.head];
 
 					this.advanceHead();
-					this.advanceTail();
 
-					newHead = this.arr[this.head] = { x: oldHead.x + dx, y: oldHead.y + dy };
+                    newHead = this.arr[this.head] = { x: oldHead.x + dx, y: oldHead.y + dy };
 
 					// detect edges
 					if (newHead.x >= columns) {
@@ -60,7 +60,13 @@
 						newHead.y = 0;
 					} else if (newHead.y <= 0) {
 						newHead.y = rows - 1;
-					}
+                    }
+                    
+                    if (this.growSize > 0) {
+                        this.growSize--;
+                    } else {
+                        this.advanceTail();
+                    }
 				};
 
 				this.advanceHead = () => this.head = this.head == this.arr.length -1 ? 0 : this.head += 1;
@@ -84,26 +90,46 @@
 				this.draw = () => {
 					let iter = this.getIterator();
 					let result = iter.next();
-					console.log("drawing head", result.value);
 					while(!result.done) {
 						ctx.fillRect(result.value.x * segmentSize, result.value.y * segmentSize, segmentSize, segmentSize);
 						result = iter.next();
 					}
-				};
-			}
+                };
+
+                this.print = () => {
+                    console.log("---- worm data ----");
+                    console.log(this.head, this.tail);
+					let iter = this.getIterator();
+					let result = iter.next();
+					while(!result.done) {
+                        console.log(result.value);
+						result = iter.next();
+					}
+                };
+
+                this.canEat = (goodie) => this.arr[this.head].x === goodie.x && this.arr[this.head].y === goodie.y;
+                this.grow = (size) => this.growSize = size;
+            }
+
 
 			const directions = { UP: 'UP', DOWN: 'DOWN', RIGHT: 'RIGHT', LEFT: 'LEFT' };
 			const gameCanvas = document.getElementById("gameCanvas");
 			const ctx = gameCanvas.getContext("2d");
 			const segmentSize = 20;
 			let maxWidth = window.innerWidth;
-			let maxHeight = window.maxHeight;
-			let	rows = maxHeight / segmentSize;
-			let	columns = maxWidth / segmentSize;
-			let gameOver = false;
+			let maxHeight = window.innerHeight;
+            let	rows = Math.floor(maxHeight / segmentSize);
+			let	columns = Math.floor(maxWidth / segmentSize);
+            let gameOver = false;
+            let gamePaused = false;
 			let direction = directions.RIGHT;
 
-			let worm = new Worm({ x: 10, y:10}, directions.RIGHT, 80);
+            let worm = new Worm({ x: 10, y:10}, directions.RIGHT, 4);
+
+            getNewGoodie = () => { return { x: Math.floor(Math.random() * columns), y: Math.floor(Math.random() * rows) }; };
+
+            let goodie =  {x: 20, y:10}; //getNewGoodie();
+            console.log(goodie);
 
 			document.addEventListener("keyup", e => {
 				if (e.key == "Right" || e.key == "ArrowRight" || e.key == "l") {
@@ -113,7 +139,12 @@
 				else if (e.key == "Left" || e.key == "ArrowLeft" || e.key == "h") {
 					direction = turnLeft();
 					worm.move(direction);
-				}
+                }
+                else if (e.key === ' ' || e.key === 'Spacebar') {
+                    gamePaused = !gamePaused;
+                    console.log("gamePaused=", gamePaused)
+                    worm.print();
+                }
 			}, false);
 
 			turnRight = () => {
@@ -132,25 +163,33 @@
 					case directions.DOWN: return directions.RIGHT;
 					case directions.LEFT: return directions.DOWN;
 				}
-			};
+            };
+
+            
+            var drawGoodie = () => {
+                ctx.beginPath();
+                ctx.arc(goodie.x*segmentSize + segmentSize/2, goodie.y*segmentSize + segmentSize/2, segmentSize/4, 0, 2 * Math.PI);
+                ctx.stroke();
+            }
 
 			var draw = () => {
-				ctx.canvas.width = maxWidth = window.innerWidth;
-				ctx.canvas.height = maxHeight = window.innerHeight;
+				if (gameOver === false && gamePaused === false) {
+                    ctx.canvas.width = maxWidth = window.innerWidth;
+                    ctx.canvas.height = maxHeight = window.innerHeight;
 
-				ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-				rows = maxHeight / segmentSize;
-				columns = maxWidth / segmentSize;
-
-				worm.move(direction);
-				worm.draw(ctx);
-
-				// detectEdges();
-
-				if (gameOver == false) {
-					requestAnimationFrame(draw);
-				}
+                    rows = Math.floor(maxHeight / segmentSize);
+                    columns = Math.floor(maxWidth / segmentSize); 
+                    worm.move(direction);
+                    if (worm.canEat(goodie)) {
+                        worm.grow(4);
+                        goodie = getNewGoodie();
+                    }
+                    worm.draw(ctx);
+                    drawGoodie();
+                }
+				requestAnimationFrame(draw);
 			}
 
 			var run = () => draw();
