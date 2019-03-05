@@ -85,13 +85,34 @@
 							yield this.arr[i];
 						}
 					}
-				};
+                };
+                
+                this.crashed = () => {
+					let iter = this.getIterator();
+                    let result = iter.next();
+                    let head = result.value;
+					while(!result.done) {
+                        if (head != result.value && head.x == result.value.x && head.y == result.value.y) {
+                            return true;
+                        }
+                        result = iter.next();
+                    }
+                    return false;
+                }
 
 				this.draw = () => {
 					let iter = this.getIterator();
 					let result = iter.next();
+                    let head = result.value;
 					while(!result.done) {
-						ctx.fillRect(result.value.x * segmentSize, result.value.y * segmentSize, segmentSize, segmentSize);
+                        if (result.value == head) {
+                            ctx.save();
+                            ctx.fillStyle = 'green';
+						    ctx.fillRect(result.value.x * segmentSize, result.value.y * segmentSize, segmentSize, segmentSize);
+                            ctx.restore();
+                        } else {
+						    ctx.fillRect(result.value.x * segmentSize, result.value.y * segmentSize, segmentSize, segmentSize);
+                        }
 						result = iter.next();
 					}
                 };
@@ -115,7 +136,7 @@
 			const directions = { UP: 'UP', DOWN: 'DOWN', RIGHT: 'RIGHT', LEFT: 'LEFT' };
 			const gameCanvas = document.getElementById("gameCanvas");
 			const ctx = gameCanvas.getContext("2d");
-			const segmentSize = 20;
+			const segmentSize = 15;
 			let maxWidth = window.innerWidth;
 			let maxHeight = window.innerHeight;
             let	rows = Math.floor(maxHeight / segmentSize);
@@ -168,7 +189,11 @@
             
             var drawGoodie = () => {
                 ctx.beginPath();
+                ctx.save();
+                ctx.fillStyle = 'red';
                 ctx.arc(goodie.x*segmentSize + segmentSize/2, goodie.y*segmentSize + segmentSize/2, segmentSize/4, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.restore();
                 ctx.stroke();
             }
 
@@ -209,6 +234,12 @@
                         rows = Math.floor(maxHeight / segmentSize);
                         columns = Math.floor(maxWidth / segmentSize); 
                         worm.move(direction);
+                        if (worm.crashed()) {
+                            gameOver = true;
+                            ctx.font = "30px Arial";
+                            ctx.fillText("GAME OVER :(", maxWidth/2-40, maxHeight/2);
+                            return;
+                        }
                         if (worm.canEat(goodie)) {
                             worm.grow(4);
                             goodie = getNewGoodie();
