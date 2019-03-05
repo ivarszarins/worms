@@ -131,7 +131,7 @@
             let goodie =  {x: 20, y:10}; //getNewGoodie();
             console.log(goodie);
 
-			document.addEventListener("keyup", e => {
+			document.addEventListener("keydown", e => {
 				if (e.key == "Right" || e.key == "ArrowRight" || e.key == "l") {
 					direction = turnRight();
 					worm.move(direction);
@@ -172,24 +172,51 @@
                 ctx.stroke();
             }
 
+            var fps = 15;
+            var now;
+            var then = Date.now();
+            var interval = 1000/fps;
+            var delta;
+
 			var draw = () => {
-				if (gameOver === false && gamePaused === false) {
-                    ctx.canvas.width = maxWidth = window.innerWidth;
-                    ctx.canvas.height = maxHeight = window.innerHeight;
+                requestAnimationFrame(draw);
+                now = Date.now();
+                delta = now - then;
+                if (delta > interval) {
+                    // update time stuffs
 
-                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    // Just `then = now` is not enough.
+                    // Lets say we set fps at 10 which means
+                    // each frame must take 100ms
+                    // Now frame executes in 16ms (60fps) so
+                    // the loop iterates 7 times (16*7 = 112ms) until
+                    // delta > interval === true
+                    // Eventually this lowers down the FPS as
+                    // 112*10 = 1120ms (NOT 1000ms).
+                    // So we have to get rid of that extra 12ms
+                    // by subtracting delta (112) % interval (100).
+                    // Hope that makes sense.
 
-                    rows = Math.floor(maxHeight / segmentSize);
-                    columns = Math.floor(maxWidth / segmentSize); 
-                    worm.move(direction);
-                    if (worm.canEat(goodie)) {
-                        worm.grow(4);
-                        goodie = getNewGoodie();
+                    then = now - (delta % interval);
+
+                    // ... Code for Drawing the Frame ...
+                    if (gameOver === false && gamePaused === false) {
+                        ctx.canvas.width = maxWidth = window.innerWidth;
+                        ctx.canvas.height = maxHeight = window.innerHeight;
+
+                        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+                        rows = Math.floor(maxHeight / segmentSize);
+                        columns = Math.floor(maxWidth / segmentSize); 
+                        worm.move(direction);
+                        if (worm.canEat(goodie)) {
+                            worm.grow(4);
+                            goodie = getNewGoodie();
+                        }
+                        worm.draw(ctx);
+                        drawGoodie();
                     }
-                    worm.draw(ctx);
-                    drawGoodie();
                 }
-				requestAnimationFrame(draw);
 			}
 
 			var run = () => draw();
